@@ -1,0 +1,119 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - UCRMS</title>
+    <link href="~/Content/mystyle.css" rel="stylesheet" />
+    <link href="~/Content/font-awesome.min.css" rel="stylesheet" />
+    <link rel="shortcut icon" type="image/ico" href="~/Images/Images.jpg">
+    <script src="~/Scripts/typed.js"></script>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+<style>
+    #main {
+        width: 100%;
+        height: 5%;
+        font-family: Fira Sans;
+    }
+
+    #logo {
+        font-size: 40px;
+        font-family: Rockwell;
+    }
+</style>
+
+</head>
+<body>
+    <div class="navbar navbar-inverse navbar-fixed-top" style="color: #C8102E" id="main">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                @*Html.ActionLink("<img s", "Index", "Home", new { area = "" }, new { @class = "navbar-brand", id = "logo" })*@
+                <a href="../Home/index.cshtml"><img src="../../Images/logo.jpg" class="logo"/></a>
+            </div>
+            <div class="navbar-collapse collapse navbar-right">
+                <ul class="nav navbar-nav">
+                    <li style="margin-top: -3px"><a href="@Url.Action("Index", "Home")" class="glyphicon glyphicon-home"></a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Department <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li>@Html.ActionLink("Save Department", "Save", "Department")</li>
+                            <li>@Html.ActionLink("View All Departmets", "DepartmentViewAll", "Department")</li>
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Course <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li>@Html.ActionLink("Save Course", "Save", "Course")</li>
+                            <li>@Html.ActionLink("Course Assign To Teacher", "AssignToTeacher", "Course")</li>
+                            <li>@Html.ActionLink("View Course Statistics", "Statistics", "Course")</li>
+                            <li class="divider"></li>
+                            <li>@Html.ActionLink("Unassign All Courses", "Unassign", "Course")</li>
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Teacher <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li>@Html.ActionLink("Save Teacher", "Save", "Teacher")</li>
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Student <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li>@Html.ActionLink("Register Student", "StudentEntry", "StudentProportion")</li>
+                            <li>@Html.ActionLink("Enroll in a Course", "EnrollCourse", "StudentProportion")</li>
+                            <li>@Html.ActionLink("Save Result", "SaveResult", "StudentProportion")</li>
+                            <li>@Html.ActionLink("View Result", "ViewResult", "StudentProportion")</li>
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Classroom <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li>@Html.ActionLink("Allocate Classrooms", "AllocateClassroom", "Classroom")</li>
+                            <li>@Html.ActionLink("Schedule Information", "ScheduleInformation", "Classroom")</li>
+                            <li class="divider"></li>
+                            <li>@Html.ActionLink("Unallocate All Classrooms", "Unallocate", "Classroom")</li>
+                        </ul>
+                    </li>
+                </ul>
+                @Html.Partial("_LoginPartial")
+            </div>
+        </div>
+    </div>
+    <div class="container body-content">
+        @RenderBody()
+        <hr />
+        <footer class="footer">
+            <p>&copy; @DateTime.Now.Year - Visiual Performer Presents</p>
+        </footer>
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    <script>
+        $('.dropdown').hover(function () {
+            $('.dropdown-toggle', this).trigger('click');
+        });
+    </script>
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/jquery-3.1.0.min.js"></script>
+    <script src="~/Scripts/typed.js"></script>
+    <script src="~/Scripts/plugins.js"></script>
+    <script>
+        $(function () {
+            $(".typed").typed({
+                strings: ["automatic Systems to Register a Student", "User Friendly", "Highly Secured", " Automatic Control Systems"],
+                typeSpeed: 0,
+                backDelay: 1000,
+                loop: true
+            });
+        });
+    </script>
+    @RenderSection("scripts", required: false)
+</body>
+</html>

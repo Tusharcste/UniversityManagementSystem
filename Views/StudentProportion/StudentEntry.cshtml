@@ -1,0 +1,148 @@
+﻿@model UniversityCourseResultManagementSystem.Models.Student
+@{
+    ViewBag.Title = "Student Register";
+}
+<link href="~/Content/bootstrap-datepicker.min.css" rel="stylesheet" />
+<link href="~/Scripts/jquery-ui-1.11.4/jquery-ui.min.css" rel="stylesheet" />
+<h2 class="header"> Register Form of Student</h2>
+<style>
+    label.error, .messageLabel {
+        color: #B94A48;
+        font-style: normal;
+        font-family: Helvetica;
+        font-size: 12px;
+    }
+</style>
+
+@using (Ajax.BeginForm("StudentEntry", "StudentProportion", new AjaxOptions() { HttpMethod = "POST", OnSuccess = "displayStudentInfo" }, new { enctype = "multipart/form-data", @id = "registerStudentForm" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.TextBoxFor(model => model.Name, new { @class = "form-control", @id = "name", @name = "name" })
+                @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Email, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.TextBoxFor(model => model.Email, new { @class = "form-control", @id = "email", @name = "email" })
+                @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.ContactNo, "Contact No", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.TextBoxFor(model => model.ContactNo, new { @class = "form-control", @id = "contactNo", @name = "contactNo" })
+                @Html.ValidationMessageFor(model => model.ContactNo, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.Label("Date", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <input type="text" id="regDate" name="regDate" class="form-control" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Address, "Address", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.TextAreaFor(model => model.Address, htmlAttributes: new { @class = "form-control", @id = "address", @name = "address" })
+                @Html.ValidationMessageFor(model => model.Address, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.Label("Department", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownListFor(model => model.DepartmentId, new SelectList(ViewBag.departmentsList, "Id", "Name"), "--Select a Department--", htmlAttributes: new { @class = "form-control", @id = "departmentId", @name = "departmentId" })
+                @Html.ValidationMessageFor(model => model.DepartmentId, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Register" id="submitButton" class="btn btn-success" />
+            </div>
+        </div>
+
+        <div class="form-group" id="message">
+            <div class="col-md-offset-2 col-md-10" style="color: GREEN">
+                <label>@ViewBag.Message</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-10">
+                @Html.HiddenFor(model => model.RegistrationNumber, htmlAttributes: new { @id = "regNo", @name = "regNo" })
+            </div>
+        </div>
+     
+    </div>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/jquery-ui-1.11.4/jquery-ui.min.js"></script>
+    <script src="~/Scripts/bootstrap-datepicker.min.js"></script>
+    <script src="~/Scripts/jquery.validate.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('#name').val("");
+            $('#email').val("");
+            $('#contactNo').val("");
+            $('#regDate').val("");
+            $('#address').val("");
+            $('#departmentId').val("");
+
+            $("#registerStudentForm").validate({
+                rules: {
+                    departmentId: "required",
+                    regDate: "required",
+                },
+                messages: {
+                    departmentId: "Please select a department",
+                    regDate: "Please select a Date"
+                }
+            });
+
+            $('#message').delay(20000).fadeOut();
+
+            $('#regDate').datepicker({
+                autoclose: true,
+                todayHighlight: true
+                 
+            });
+
+            $("#departmentId").change(function() {
+                var deptId = $("#departmentId").val();
+                var registrationDate = $("#regDate").val();
+                var json = { departmentId: deptId, regDate: registrationDate };
+                $('#regNo').empty();
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("GetRegistrationNo", "StudentProportion")',
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify(json),
+                    success: function(data) {
+                        $('#regNo').val(data.toString());
+                    }
+                });
+            });
+        });
+
+    </script>
+
+
+}

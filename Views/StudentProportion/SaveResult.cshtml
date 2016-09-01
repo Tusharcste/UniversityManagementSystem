@@ -1,0 +1,163 @@
+﻿@using System.Web.UI.WebControls
+@using UniversityCourseResultManagementSystem.Models
+@model UniversityCourseResultManagementSystem.Models.StudentCourses
+@{
+    ViewBag.Title = "Student Result";
+    List<Student> studentsList = ViewBag.studentsList;
+    List<Grade> gradesList = ViewBag.gradesList;
+}
+<h2 class="header">Save Student Result</h2>
+@using (Html.BeginForm("SaveResult", "StudentProportion", FormMethod.Post, new { @id = "saveResultForm" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="form-horizontal">
+        <hr />
+        <div class="form-group">
+            @Html.LabelFor(model => model.StudentId, "Student Reg. No.", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <select class="form-control" id="studentId" name="StudentId">
+                    <option value="">--Select a RegNo--</option>
+                    @foreach (var studentList in studentsList)
+                    {
+                        <option value="@studentList.Id">@studentList.RegistrationNumber</option>
+                    }
+                </select>
+                @Html.ValidationMessageFor(model => model.StudentId, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.Label("Name", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <input type="text" name="studentName" id="studentName" class="form-control" readonly="readonly" placeholder="Student's Name" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.Label("Email", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <input type="text" name="studentEmail" id="studentEmail" class="form-control" readonly="readonly" placeholder="Student's Email" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.Label("Department", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <input type="text" name="departmentId" id="departmentId" class="form-control" readonly="readonly" placeholder="Student's Department" />
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            @Html.Label("Select Course", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <select class="form-control" id="courseId" name="CourseId"></select>
+                @Html.ValidationMessageFor(model => model.CourseId, "", new { @class = "text-danger" })
+            </div>
+
+        </div>
+
+
+        <div class="form-group">
+            @Html.Label("Student Grade Letter", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <select class="form-control" id="gradeId" name="GradeId">
+                    <option value="">--Select Grade--</option>
+                    @foreach (var gradeList in gradesList)
+                    {
+                        <option value="@gradeList.Id">@gradeList.Name</option>
+                    }
+                </select>
+                @Html.ValidationMessageFor(model => model.GradeId, "", new { @class = "text-danger" })
+            </div>
+
+        </div>
+
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Save" class="btn btn-success" id="saveResultButton" name="saveResultButton" />
+            </div>
+        </div>
+
+        <div class="form-group" id="message">
+            <div class="col-md-offset-2 col-md-10" style="color: GREEN">
+                <label>@ViewBag.Message</label>
+            </div>
+        </div>
+        
+        <div class="form-group" id="message">
+            <div class="col-md-offset-2 col-md-10" style="color: #B94A48">
+                <label>@ViewBag.FailMessage</label>
+            </div>
+        </div>
+
+      
+    </div>
+}
+
+@section scripts{
+   @Scripts.Render("~/bundles/jqueryval")
+<script src="~/Scripts/jquery-ui-1.11.4/jquery-ui.min.js"></script>
+<script src="~/Scripts/jquery.validate.min.js"></script>
+@*<script src="~/Scripts/jquery.validate.unobtrusive.js"></script>*@
+<script type="text/javascript">
+        $(document).ready(function() {
+            $('#message').delay(10000).fadeOut();
+            $("#saveResultForm").validate({
+                rules: {
+                    studentId: "required",
+                    courseId: "required",
+                    gradeId: "required"
+                },
+                messages: {
+                    studentId: "Please select a Student",
+                    courseId: "Please select a Course",
+                    gradeId: "Please select a Grade",
+                }
+            });
+            $("#studentId").change(function() {
+                var stdntId = $("#studentId").val();
+                $("#studentName").val("");
+                $("#studentEmail").val("");
+                $("#departmentId").val("");
+                var json = { studentId: stdntId };
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("GetStudentInfoByStudentId", "StudentProportion")',
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify(json),
+                    datatype: 'json',
+                    success: function(data) {
+                        $.each(data, function(i, value) {
+                            $("#studentName").val(value.Name);
+                            $("#studentEmail").val(value.Email);
+                            $("#departmentId").val(value.DepartmentName);
+
+                            var studentId = value.Id;
+
+                            json = { studentId: studentId };
+                            $.ajax({
+                                type: "POST",
+                                url: '@Url.Action("GetCoursesByStudentId", "StudentProportion")',
+                                contentType: "application/json; charset=utf-8",
+                                data: JSON.stringify(json),
+                                success: function(courseList) {
+                                    var courses = "<option value=''>--Select Course--</option>";
+                                    $.each(courseList, function(key, course) {
+                                        courses += '<option value=' + course.CourseId + '>' + course.CourseName + '</option>';
+                                    });
+                                    $("#courseId").html(courses);
+                                }
+                            });
+
+                        });
+                    },
+                    error: function(ex) {
+                        alert('Failed to retrieve Student Information' + ex);
+                    }
+                });
+            });
+        });
+</script>
+}

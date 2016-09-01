@@ -1,0 +1,149 @@
+﻿@using System.Web.UI.WebControls
+@using UniversityCourseResultManagementSystem.Models
+@model UniversityCourseResultManagementSystem.Models.StudentCourses
+@{
+    ViewBag.Title = " View Student Result";
+    List<Student> studentsList = ViewBag.studentsList;
+}
+<h2 class="header">View Student Result</h2>
+@using (Html.BeginForm("ViewResult", "StudentProportion", FormMethod.Post, new { Id = "viewResultForm" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="form-horizontal">
+        <hr />
+        <div class="form-group">
+            @Html.LabelFor(model => model.Id, "Student Reg. No.", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <select class="form-control" id="StudentId" name="StudentId">
+                    <option value="">--Select a RegNo--</option>
+                    @foreach (var studentList in studentsList)
+                    {
+                        <option value="@studentList.Id">@studentList.RegistrationNumber</option>
+                    }
+                    @Html.ValidationMessageFor(model => model.StudentId, "", new { @class = "text-danger" })
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.Label("Name", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <input type="text" name="studentName" id="studentName" class="form-control" readonly="readonly" placeholder="Student's Name" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.Label("Email", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <input type="text" name="studentEmail" id="studentEmail" class="form-control" readonly="readonly" placeholder="Student's Email" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.Label("Department", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <input type="text" name="departmentId" id="departmentId" class="form-control" readonly="readonly" placeholder="Student's Department" />
+            </div>
+        </div>
+
+        <div class="form-group" id="message">
+            <div class="col-md-offset-2 col-md-10" style="color: GREEN">
+                <label>@ViewBag.Message</label>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input id="submit" name="submit" type="submit" value="Make PDF" class="btn btn-success" />
+                @*@Html.ActionLink("Make PDF", "PrintResult","StudentProportion",null, new{target="_blank"})*@
+            </div>
+        </div>
+
+        <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <table class="table table-striped table-bordered table-hover table-condensed" id="resultInformation">
+                <tr>
+                    <th>
+                        @Html.DisplayName("CourseCode")
+                    </th>
+                    <th>
+                        @Html.DisplayName("Name")
+                    </th>
+                    <th>
+                        @Html.DisplayName("Grade")
+                    </th>
+                </tr>
+            </table>
+        </div>
+    </div>
+  </div>
+   
+}
+
+@section scripts{
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/jquery-ui-1.11.4/jquery-ui.min.js"></script>
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#message').delay(20000).fadeOut();
+            $("#saveResultForm").validate({
+                rules: {
+                    StudentId: "required",
+                },
+                messages: {
+                    StudentId: "Please select a Student",
+                   
+                }
+            });
+            $("#StudentId").change(function() {
+                var stdntId = $("#StudentId").val();
+                $("#studentName").val("");
+                $("#studentEmail").val("");
+                $("#departmentId").val("");
+                var json = { studentId: stdntId };
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("GetStudentInfoByStudentId", "StudentProportion")',
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify(json),
+                    datatype: 'json',
+                    success: function(data) {
+                        $.each(data, function(i, value) {
+                            $("#studentName").val(value.Name);
+                            $("#studentEmail").val(value.Email);
+                            $("#departmentId").val(value.DepartmentCode);
+                        });
+                    },
+                    error: function(ex) {
+                        alert('Failed to retrieve Student Information' + ex);
+                    }
+                });
+            });
+        });
+
+        $("#StudentId").change(function() {
+            var studentId = $("#StudentId").val();
+            var json = { StudentId: studentId };
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("GetViewResultStatistics", "StudentProportion")',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(json),
+                success: function(data) {
+                    $('#resultInformation').empty();
+                    $('#resultInformation').append('<tr><th>' + "Course Code" + '</th><th>' + "Name" + '</th><th>' + "Grade" + '</th><th>');
+                    if (data == "")
+                        $("#resultInformation").append("<b>No Course Assigned  For This Student.</b>");
+                    else {
+                        $.each(data, function(key, value) {
+                            $("#resultInformation").append('<tr><td>' + value.CourseCode + '</td><td>' + value.CourseName + '</td><td>' + value.GradeName + '</td><td>');
+
+                        });
+                    }
+                }
+            });
+        });
+    </script>
+}

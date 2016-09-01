@@ -1,0 +1,312 @@
+﻿@using System.Web.UI.WebControls
+@model UniversityCourseResultManagementSystem.Models.Course
+@{
+    ViewBag.Title = "Assign Course";
+}
+<style>
+    label.error, .messageLabel {
+        color: #B94A48;
+        font-style: normal;
+        font-family: Helvetica;
+        font-size: 12px;
+    }
+</style>
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+<link href="~/Content/jquery-confirm.min.css" rel="stylesheet" />
+<h2 class="header">Assign Course To Teacher</h2>
+@using (Html.BeginForm("AssignToTeacher", "Course", FormMethod.Post, new {Id = "assignCourseToTeacherForm"}))
+{
+    @Html.AntiForgeryToken()
+    <div class="form-horizontal">
+        <hr/>
+        <div class="form-group">
+            @Html.Label("Department",htmlAttributes:new{@class="control-label col-md-2"})
+            <div class="col-md-10">
+                <select class="form-control" id="departmentId" name="departmentId">
+                    <option value="">--Select a Department--</option>
+                    @foreach (var departmentList in ViewBag.departmentsList)
+                    {
+                        <option value="@departmentList.Id">@departmentList.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.Label("Teacher", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <select class="form-control" id="teacherId" name="teacherId">
+                    @*<option value="">--Select a Teacher--</option>*@
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.Label("Credit to be taken", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <input type="text" name="creditToBeTaken" id="creditToBeTaken" class="form-control" readonly="readonly" placeholder="Teacher's Credit"/>
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.Label("Remaining Credit", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <input type="text" name="remainingCredit" id="remainingCredit" class="form-control" readonly="readonly" placeholder="Teacher's remaining credit" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.Label("Course Code", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <select class="form-control" id="courseId" name="courseId">
+                    @*<option value="">--Select a Teacher--</option>*@
+                </select>
+            </div>
+            @* @Html.ValidationMessageFor(model => model.Id, "", new { @class = "text-danger" })*@
+        </div>
+        <div class="form-group">
+            @Html.Label("Name", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <input type="text" name="courseName" id="courseName" class="form-control" readonly="readonly" placeholder="Course Name" />
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.Label("Credit", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <input type="text" name="courseCredit" id="courseCredit" class="form-control" readonly="readonly" placeholder="Course credit" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Assign" class="btn btn-success" id="allocateButton" name="allocateButton" />
+            </div>
+        </div>
+        
+        <div class="form-group" id="message">
+            <div class="col-md-offset-2 col-md-10" style="color: GREEN">
+                <label>@ViewBag.Message</label>
+            </div>
+            <div class="col-md-offset-2 col-md-10" style="color: #B94A48">
+                <label id="failMessage">@ViewBag.FailMessage</label>
+                <label id="failMessageLabel" name="failMessageLabel"></label>
+            </div>
+        </div>
+    </div>
+}
+
+@section scripts{
+    <script src="~/Scripts/jquery-3.1.0.min.js"></script>
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <script src="~/Scripts/jquery-ui-1.11.4/jquery-ui.min.js"></script>
+    <script src="~/Scripts/jquery-ui-1.11.4/jquery-ui.min.js"></script>
+    <script src="~/Scripts/jquery-confirm.min.js"></script>
+    <script>
+
+
+        $(document).ready(function() {
+            $('#message').delay(20000).fadeOut();
+            $('#creditToBeTaken').val("");
+            $('#remainingCredit').val("");
+            $('#courseName').val("");
+            $('#courseCredit').val("");
+            document.getElementById("failMessageLabel").textContent = "";
+
+            $("#assignCourseToTeacherForm").validate({
+                rules: {
+                    departmentId: "required",
+                    teacherId: "required",
+                    courseId: "required"
+                },
+                messages: {
+                    departmentId: "Please select a Department",
+                    teacherId: "Please select a Teacher",
+                    courseId: "Please select a Course"
+                }
+            });
+
+
+            $("#departmentId").change(function() {
+                var departmentId = $("#departmentId").val();
+                var json = { departmentId: departmentId };
+                $("#teacherId").empty();
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("GetTeachersByDepartmentId", "Course")',
+                    contentType: "Application/json; charset=utf-8",
+                    data: JSON.stringify(json),
+                    success: function(data) {
+                        $("#teacherId").append('<option value="">--Select a Teacher--</option>');
+                        $.each(data, function(key, value) {
+                            $("#teacherId").append('<option value=' + value.Id + '>' + value.Name + '</option>');
+                        });
+                    }
+
+                });
+            });
+        });
+
+        $(document).ready(function() {
+            $("#departmentId").change(function() {
+                var departmentId = $("#departmentId").val();
+                var json = { departmentId: departmentId };
+                $("#courseId").empty();
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("GetCoursesByDepartmentId", "Course")',
+                    contentType: "Application/json; charset=utf-8",
+                    data: JSON.stringify(json),
+                    success: function(data) {
+                        $("#courseId").append('<option value="">--Select a Course Code--</option>');
+                        $.each(data, function(key, value) {
+                            $("#courseId").append('<option value=' + value.Id + '>' + value.Code + '</option>');
+                        });
+                    }
+
+                });
+            });
+        });
+
+        $("#teacherId").change(function() {
+            var teachersId = $("#teacherId").val();
+            var json = { teacherId: teachersId };
+            $('#creditToBeTaken').val("");
+            $("#remainingCredit").val("");
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("GetTeachersDetails", "Course")',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(json),
+                success: function(data) {
+                    $("#creditToBeTaken").val(data.CreditToBeTaken);
+                    $("#remainingCredit").val(data.RemainingCredit);
+                }
+            });
+        });
+
+        $("#courseId").change(function() {
+            var courseId = $("#courseId").val();
+            var json = { courseId: courseId };
+            $("#courseName").val("");
+            $("#courseCredit").val("");
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("GetCourseDetails", "Course")',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(json),
+                success: function(data) {
+                    $.each(data, function(key, value) {
+                        $("#courseName").val(value.Name);
+                        $("#courseCredit").val(value.Credit);
+                    });
+                }
+            });
+        });
+
+
+        $('#allocateButton').on('click',
+            function() {
+                var rm = $("#remainingCredit").val();
+                var c = $("#courseCredit").val();
+                var submitForm = true;
+                if (parseFloat(rm) < parseFloat(c)) {
+                    submitForm = false;
+                    $.confirm({
+                        title: 'WARNING !!Remaining Course is less then zero !!!',
+                        content: 'If You Want To Assign Then Click PROCEED!!',
+                        confirmButton: 'Proceed',
+                        cancelButton: 'Cancel',
+                        keyboardEnabled: true,
+                        theme: 'bootstrap',
+                        backgroundDismiss: true,
+                        confirmButtonClass: 'btn-success',
+                        cancelButtonClass: 'btn-danger',
+                        icon: 'fa fa-warning',
+                        animation: 'scale',
+                        animationClose: 'top',
+                        opacity: 0.5,
+                        confirm: function() {
+                            $.confirm({
+                                title: 'Are You Sure?',
+                                content: 'Are You Sure To Confirm This Action?',
+                                confirmButton: 'Yes',
+                                cancelButton: 'No',
+                                icon: 'fa fa-question-circle',
+                                keyboardEnabled: true,
+                                theme: 'bootstrap',
+                                backgroundDismiss: true,
+                                confirmButtonClass: 'btn-success',
+                                cancelButtonClass: 'btn-danger',
+                                animation: 'zoom',
+                                confirm: function() {
+                                    var assignCourse = {
+                                        courseId: $("#courseId").val(),
+                                        teacherId: $("#teacherId").val()
+                                    };
+                                    $.ajax({
+                                        type: "POST",
+                                        url: '@Url.Action("AssignToTeacher", "Course")',
+                                    contentType: "application/json; charset=utf-8",
+                                    data: JSON.stringify(assignCourse),
+                                    success: function(data) {
+                                        $(".msgScss").show();
+                                        $('.msgScss').delay(3000).fadeOut(1000);
+                                        $("#departmentId").val('');
+                                        $("#teacherId").empty();
+                                        $("#courseId").empty();
+                                        $("#creditToBeTaken").val("Teacher's Credit Limit");
+                                        $("#cemainingCredit").val("Teacher's Remaining Credit");
+                                        $("#courseName").val("Course Name");
+                                        $("#courseCredit").val("Course Credit"); 
+                                        submitForm = true;
+                                        $('#creditToBeTaken').val("");
+                                        $('#remainingCredit').val("");
+                                        $('#courseName').val("");
+                                        $('#courseCredit').val("");
+                                        $("#message").val(@ViewBag.Message);
+
+                                    }
+                                });
+                            },
+                            cancel: function() {
+                                submitForm = true;
+                                $("#departmentId").val('');
+                                $("#teacherId").empty();
+                                $("#courseId").empty();
+                                $("#creditToBeTaken").val("Teacher's Credit Limit");
+                                $("#remainingCredit").val("Teacher's Remaining Credit");
+                                $("#courseName").val("Course Name");
+                                $("#courseCredit").val("Course Credit");
+
+                                $('#creditToBeTaken').val("");
+                                $('#remainingCredit').val("");
+                                $('#courseName').val("");
+                                $('#courseCredit').val("");
+                               
+                            }
+                        });
+
+                    },
+                    cancel: function() {
+                        submitForm = true;
+                        $("#departmentId").val('');
+                        $("#teacherId").empty();
+                        $("#courseId").empty();
+                        $("#creditToBeTaken").val("Teacher's Credit Limit");
+                        $("#remainingCredit").val("Teacher's Remaining Credit");
+                        $("#courseName").val("Course Name");
+                        $("#courseCredit").val("Course Credit");
+
+                        $('#creditToBeTaken').val("");
+                        $('#remainingCredit').val("");
+                        $('#courseName').val("");
+                        $('#courseCredit').val("");
+                    }
+                });
+            }
+            $('form').submit(function() {
+                return submitForm;
+            });
+        });
+
+   
+
+    </script>
+}

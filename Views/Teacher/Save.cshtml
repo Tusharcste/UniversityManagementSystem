@@ -1,0 +1,155 @@
+﻿@using UniversityCourseResultManagementSystem.Models
+@model UniversityCourseResultManagementSystem.Models.Teacher
+
+@{
+    ViewBag.Title = "Save Teacher";
+    List<Department> departments = ViewBag.departmentsList;
+    List<Designation> designations = ViewBag.designationsList;
+}
+<style>
+    label.error, .messageLabel {
+        color: #B94A48;
+        font-style: normal;
+        font-family: Helvetica;
+        font-size: 12px;
+    }
+</style>
+<h2 class ="header">Save Teacher</h2>
+
+
+@using (Html.BeginForm("Save", "Teacher", FormMethod.Post, new { Id = "saveTeacherForm" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.TextBoxFor(model => model.Name, new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger", @id = "Name", @name = "Name" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Address, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.TextAreaFor(model => model.Address, htmlAttributes: new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.Address, "", new { @class = "text-danger", @id = "Address", @name = "Address"})
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Email, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.TextBoxFor(model => model.Email, new { @class = "form-control"})
+                @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" ,@id = "Email", @name = "Email"})
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.ContactNo, "Contact No.", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.TextBoxFor(model => model.ContactNo, new { @class = "form-control", @id = "ContactNo", @name = "ContactNo"})
+                @Html.ValidationMessageFor(model => model.ContactNo, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.DesignationId, "Designation", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <select class="form-control" id="DesignationId" name="DesignationId">
+                    <option value="">--Select Designation--</option>
+                    @foreach (var designation in designations)
+                    {
+                        <option value="@designation.Id">@designation.Name</option>
+                    }
+                </select>
+                @Html.ValidationMessageFor(model => model.DesignationId, "", new { @class = "text-danger", @id = "deginationId", @name = "deginationId" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.DepartmentId, "Department", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <select class="form-control" id="DepartmentId" name="DepartmentId">
+                    <option value="">--Select Department--</option>
+                    @foreach (var department in departments)
+                    {
+                        <option value="@department.Id">@department.Name</option>
+                    }
+                </select>
+                @Html.ValidationMessageFor(model => model.DepartmentId, "", new { @class = "text-danger", @id = "departmentId", @name = "departmentId" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.CreditToBeTaken, "Credit to be taken", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.TextBoxFor(model => model.CreditToBeTaken, new { @class = "form-control", @id = "CreditToBeTaken", @name = "CreditToBeTaken"})
+                @Html.ValidationMessageFor(model => model.CreditToBeTaken, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Save" class="btn btn-success" />
+            </div>
+        </div>
+
+        <div class="form-group" id="message">
+            <div class="col-md-offset-2 col-md-10" style="color: GREEN">
+                <label>@ViewBag.Message</label>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/jquery-3.1.0.min.js"></script>
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#message').delay(10000).fadeOut();
+            $('#Name').val("");
+            $('#Email').val("");
+            $('#ContactNo').val("");
+            $('#deginationId').val("");
+            $('#Address').val("");
+            $('#departmentId').val("");
+            $('#CreditToBeTaken').val("");
+        
+        $("#saveTeacherForm").validate({
+            rules: {
+                DesignationId: "required",
+                DepartmentId: "required"
+
+            },
+            messages: {
+                DepartmentId: "Please select a Department of a teacher",
+                DesignationId: "Please select a Designation of a teacher."
+            }
+        });
+        });
+    </script>
+    <script>
+        $("#Name").onkeypress = function (e) {
+            var e = window.event || e;
+            var keyunicode = e.charCode || e.keyCode;
+            return (keyunicode >= 65 && keyunicode <= 90 || keyunicode >= 96 && keyunicode <= 122 || keyunicode == 8 || keyunicode == 32 || keyunicode == 39 || keyunicode == 46) ? true : false;
+        },
+            $("#ContactNo").onkeypress = function (e) {
+                var e = window.event || e;
+                var keyunicode = e.charCode || e.keyCode;
+                return (keyunicode >= 48 && keyunicode <= 57 || keyunicode == 8 || keyunicode == 43) ? true : false;
+            },
+            $("#CreditToBeTaken").onkeypress = function (e) {
+                var e = window.event || e;
+                var keyunicode = e.charCode || e.keyCode;
+                return (keyunicode >= 48 && keyunicode <= 57 || keyunicode == 8 || keyunicode == 46) ? true : false;
+            }
+        
+    </script>
+}
