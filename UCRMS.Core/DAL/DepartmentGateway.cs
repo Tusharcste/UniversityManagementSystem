@@ -8,7 +8,7 @@ using UniversityCourseResultManagementSystem.Models;
 
 namespace UniversityCourseResultManagementSystem.UCRMS.Core.DAL
 {
-    public class DepartmentGateway : BaseGateway
+    public class DepartmentGateway:BaseGateway
     {
         public int SaveAllDepartments(Department department)
         {
